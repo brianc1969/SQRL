@@ -1,48 +1,42 @@
 package com.sqrl;
 
+import com.sqrl.authc.credential.SQRLPublicKeyId;
+import com.sqrl.authc.credential.SQRLSignature;
 import com.sqrl.utils.Base64Url;
 
 public class SQRLAuthentication {
 
     /**
-     * Entire site URL that this authentication object was generated for. (E.g.
-     * "www.example.com/sqrl?KJA7nLFDQWWmvt10yVjNDoQ81uTvNorPrr53PPRJesz")
+     * The crypto signature of the siteURL (512-bits) and the signed payload
      */
-    private String siteURL;
+    private SQRLSignature identityAuthentication;
 
     /**
-     * The crypto signature of the siteURL (512-bits)
+     * The user identification for this site
      */
-    private byte[] identityAuthentication;
+    private final SQRLPublicKeyId sqrlAnonymousId;
 
-    /**
-     * The corresponding public key for the signature. This will allow the site
-     * to verify the identityAuthentication signature above.
-     */
-    private byte[] identityPublicKey;
-
-    public SQRLAuthentication(String siteURL, byte[] identityAuthentication, byte[] identityPublicKey) {
-        this.siteURL = siteURL;
-        this.identityAuthentication = identityAuthentication;
-        this.identityPublicKey = identityPublicKey;
+    public SQRLAuthentication(String sqrlRealm, String siteURL, byte[] identityAuthentication, byte[] identityPublicKey) {
+        this.sqrlAnonymousId = new SQRLPublicKeyId(sqrlRealm,identityPublicKey);
+        this.identityAuthentication = new SQRLSignature(siteURL,identityAuthentication);
     }
 
     public String getSiteURL() {
-        return siteURL;
+        return identityAuthentication.getSiteURL();
     }
 
     public byte[] getIdentityAuthentication() {
-        return identityAuthentication;
+        return identityAuthentication.getSignature();
     }
 
     public byte[] getIdentityPublicKey() {
-        return identityPublicKey;
+        return sqrlAnonymousId.getKey();
     }
 
     @Override
     public String toString() {
-        return "SQRLAuthentication [siteURL=" + siteURL + ", identityAuthentication="
-                + Base64Url.encode(identityAuthentication) + ", identityPublicKey="
-                + Base64Url.encode(identityPublicKey) + "]";
+        return "SQRLAuthentication [siteURL=" + getSiteURL() + ", identityAuthentication="
+                + Base64Url.encode(getIdentityAuthentication()) + ", identityPublicKey="
+                + Base64Url.encode(getIdentityPublicKey()) + "]";
     }
 }
