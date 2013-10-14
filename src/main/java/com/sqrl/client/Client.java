@@ -135,8 +135,8 @@ public class Client {
             bytesOut.write(exportedIdentity.getPasswordVerify());
             bytesOut.write(exportedIdentity.getPasswordParameters().getHashN());
             bytesOut.write(exportedIdentity.getPasswordParameters().getHashR());
-            bytesOut.write((exportedIdentity.getPasswordParameters().getHashP() >> 8) & 0xFF);
-            bytesOut.write(exportedIdentity.getPasswordParameters().getHashP() & 0xFF);
+            bytesOut.write((exportedIdentity.getPasswordParameters().getHashP() >>> 8) & 0xFF);
+            bytesOut.write((exportedIdentity.getPasswordParameters().getHashP() >>> 0) & 0xFF);
             byte[] storedMaster = bytesOut.toByteArray();
             String encodedStoredMaster = Base64Url.encode(storedMaster);
 
@@ -301,7 +301,8 @@ public class Client {
         System.out.println();
 
         // STEP 4: HMACSHA-256 the master key result from STEP 3: with the site TLD
-        byte[] privateKey = HMACSHA256.mac(originalMasterKey, getTLD(siteURL));
+        String sqrlRealm = getTLD(siteURL);
+        byte[] privateKey = HMACSHA256.mac(originalMasterKey, sqrlRealm);
         System.out.println("STEP 4: ");
         System.out.println("Private Key Length: " + privateKey.length * 8 + " bits");
         System.out.println("Private Key: " + Base64Url.encode(privateKey));
@@ -324,7 +325,7 @@ public class Client {
 
         // Return authentication object containing all the
         // outputs which are to be sent to the server.
-        return new SQRLAuthentication(siteURL, signature, publicKey);
+        return new SQRLAuthentication(sqrlRealm, siteURL, signature, publicKey);
     }
 
     // //////////// HELPER FUNCTIONS //////////////////
