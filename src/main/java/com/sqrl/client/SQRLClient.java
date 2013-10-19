@@ -41,11 +41,20 @@ public class SQRLClient {
          */
     }
 
-    public static SQRLIdentity exportMasterKey(SQRLIdentity identity, String password) throws SQRLException {
+    /**
+     * Creates an exported key identity with the specified difficulty parameters. 
+     * @param identity
+     * @param password
+     * @param exportedDifficultyParameters
+     * @return SQRLIdentity representing the exported identity
+     * @throws SQRLException - if the current password is incorrect
+     */
+    public static SQRLIdentity exportMasterKey(SQRLIdentity identity, String password, 
+                                           SQRLPasswordParameters exportedDifficultyParameters) throws SQRLException {
         // STEP 1: Scrypt the current password + passwordSalt
         // This is the expensive operation and its parameters should be tuned so
         // that this operation takes between 1-2 seconds to perform.
-        byte[] scryptResult = SCrypt.scrypt(password, identity.getPasswordParameters());
+        byte[] scryptResult = SCrypt.scrypt(password, identity.getPasswordSalt(), identity.getPasswordParameters());
         
         // STEP 2: Check the sha256 hash of the result from STEP 1 verse the
         // current stored passwordVerify value.
@@ -63,8 +72,7 @@ public class SQRLClient {
         byte[] newPasswordSalt = secureRandom(8); // 64-bit salt
         
         // STEP 5: SCrypt the current password and newPasswordSalt with WAY more difficult SCryptParameters
-        SQRLPasswordParameters newPasswordParameters = new SQRLPasswordParameters(newPasswordSalt, 18, 8, 90);
-        byte[] newScryptResult = SCrypt.scrypt(password, newPasswordParameters);
+        byte[] newScryptResult = SCrypt.scrypt(password, newPasswordSalt, exportedDifficultyParameters);
         
         // STEP 6: SHA256 the SCrypt result from STEP 5 to create the new password verifier
         byte[] newPasswordVerify = SHA256.digest(newScryptResult);
@@ -81,15 +89,41 @@ public class SQRLClient {
         // Return a new SQRLIdentity with the new password salt, password verify, password parameters 
         //  and master identity key
         return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
-                                newPasswordVerify, newPasswordParameters);
+                                newPasswordVerify, newPasswordSalt, exportedDifficultyParameters);
     }
     
+    /**
+     * Changes the password for the SQRLIdentity and returns a new SQRLIdentity. The SQRLPasswordParameters
+     * for the new SQRLIdentity will be exactly the same as SQRLPasswordParameters from old SQRLIdentity.
+     *  
+     * @param identity
+     * @param currentPassword
+     * @param newPassword
+     * @return new SQRLIdentity representing the changed password
+     * @throws SQRLException - if currentPassword is incorrect
+     */
     public static SQRLIdentity changePassword(SQRLIdentity identity, String currentPassword, String newPassword)
                                                                                                 throws SQRLException {
+        return changePassword(identity, currentPassword, newPassword, identity.getPasswordParameters());
+    }
+
+    /**
+     * Changes the password for the SQRLIdentity and returns a new SQRLIdentity under the new SQRLPasswordParameters
+     * 
+     * @param identity
+     * @param currentPassword
+     * @param newPassword
+     * @param newParameters
+     * @return new SQRLIdentity representing the changed password
+     * @throws SQRLException - if currentPassword is incorrect
+     */
+    public static SQRLIdentity changePassword(SQRLIdentity identity, String currentPassword, String newPassword,
+                                                         SQRLPasswordParameters newParameters) throws SQRLException {
         // STEP 1: Scrypt the current password + passwordSalt
         // This is the expensive operation and its parameters should be tuned so
         // that this operation takes between 1-2 seconds to perform.
-        byte[] scryptResult = SCrypt.scrypt(currentPassword, identity.getPasswordParameters());
+        byte[] scryptResult = SCrypt.scrypt(currentPassword, identity.getPasswordSalt(), 
+                                            identity.getPasswordParameters());
 
         // STEP 2: Check the sha256 hash of the result from STEP 1 verse the
         // current stored passwordVerify value.
@@ -107,8 +141,7 @@ public class SQRLClient {
         byte[] newPasswordSalt = secureRandom(8); // 64-bit salt
 
         // STEP 5: SCrypt the newPassword and newPasswordSalt
-        SQRLPasswordParameters newPasswordParameters = new SQRLPasswordParameters(newPasswordSalt, 16, 8, 12);
-        byte[] newScryptResult = SCrypt.scrypt(newPassword, newPasswordParameters);
+        byte[] newScryptResult = SCrypt.scrypt(newPassword, identity.getPasswordSalt(), newParameters);
         
         // STEP 6: SHA256 the SCrypt result from STEP 5 to create the new password verifier
         byte[] newPasswordVerify = SHA256.digest(newScryptResult);
@@ -126,7 +159,7 @@ public class SQRLClient {
         // Note: the password is not permanently changed until this new identity object is written over the
         //       old identity on disk.
         return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
-                                newPasswordVerify, newPasswordParameters);
+                                newPasswordVerify, newPasswordSalt, newParameters);
     }
 
     public static SQRLAuthentication createAuthentication(SQRLIdentity identity, String password, String siteURL) 
@@ -134,7 +167,7 @@ public class SQRLClient {
         // STEP 1: Scrypt the password + passwordSalt
         // This is the expensive operation and its parameters should be tuned so
         // that this operation takes between 1-2 seconds to perform.
-        byte[] scryptResult = SCrypt.scrypt(password, identity.getPasswordParameters());
+        byte[] scryptResult = SCrypt.scrypt(password, identity.getPasswordSalt(), identity.getPasswordParameters());
 
         // STEP 2: Check the sha256 hash of the result from STEP 1 verse the
         // stored passwordVerify value.

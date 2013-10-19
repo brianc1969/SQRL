@@ -1,19 +1,10 @@
 package com.sqrl;
 
-import com.sqrl.utils.Base64Url;
 
 /**
  * Encapsulates all of the password encryption parameters.
  */
 public class SQRLPasswordParameters {
-    /**
-     * Password Salt (64-bits)
-     * 
-     * This is a randomly generated salt value generated when the password is
-     * first set. Whenever the password changes, this also should change.
-     */
-    private byte[] passwordSalt;
-
     /**
      * SCrypt number of rounds
      */
@@ -34,16 +25,11 @@ public class SQRLPasswordParameters {
      */
     private int dkLen;
 
-    public SQRLPasswordParameters(byte[] passwordSalt, int N, int r, int p) {
-        this.passwordSalt = passwordSalt;
+    public SQRLPasswordParameters(int N, int r, int p) {
         this.N = N;
         this.r = r;
         this.p = p;
         this.dkLen = 32;
-    }
-
-    public byte[] getPasswordSalt() {
-        return passwordSalt;
     }
 
     public int getHashN() {
@@ -64,7 +50,6 @@ public class SQRLPasswordParameters {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "[N=" + N + ", r=" + r + ", p=" + p + ", salt="
-                + Base64Url.encode(passwordSalt) + "]";
+        return this.getClass().getSimpleName() + "[N=" + N + ", r=" + r + ", p=" + p + "]";
     }
 }

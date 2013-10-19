@@ -25,10 +25,14 @@ public class TestSQRLClient {
     byte[] privateMasterIdentityKey = Base64Url.decode("VxXA0VcczUN6nj_9bMVlCeP7ogpqhmLCK54GIFTSl1s");
     byte[] passwordSalt = Base64Url.decode("Ze6tha--1E0");
     byte[] passwordVerify = Base64Url.decode("wMS9dlme6gyPDkT9obtWiQyLYiLLC9nv-QJICM3xgXI");
-
-    SQRLPasswordParameters examplePasswordParameters = new SQRLPasswordParameters(passwordSalt, 16, 8, 12);
-    SQRLIdentity exampleIdentity = new SQRLIdentity("example identity", privateMasterIdentityKey, passwordVerify,
-            examplePasswordParameters);
+    
+    // device identity difficulty parameters (around 2secs to verify a password)
+    SQRLPasswordParameters examplePasswordParameters = new SQRLPasswordParameters(16, 8, 12);
+    // exported identity difficulty parameters (around 60secs to verify a password)
+    SQRLPasswordParameters exportedPasswordParams = new SQRLPasswordParameters(18, 8, 90);
+    
+    SQRLIdentity exampleIdentity = new SQRLIdentity("example identity", privateMasterIdentityKey, passwordVerify, 
+                                                    passwordSalt, examplePasswordParameters);
 
     @Test
     public void testLogin() {
@@ -73,7 +77,7 @@ public class TestSQRLClient {
             // Change the user's password, this will throw
             // PasswordVerifyException if the current password is incorrect
             SQRLIdentity changedPasswordIdentity = SQRLClient.changePassword(exampleIdentity, currentPassword,
-                    newPassword);
+                                                                             newPassword);
 
             // To verify that the password change works as expected, the orginal
             // exampleIdentity and the new
@@ -107,7 +111,8 @@ public class TestSQRLClient {
             // to do this just call change password before exporting:
             // exportMasterKey(changePassword(exampleIdentity, currentPassword,
             // newPassword), newPassword);
-            SQRLIdentity exportedIdentity = SQRLClient.exportMasterKey(exampleIdentity, currentPassword);
+            SQRLIdentity exportedIdentity = SQRLClient.exportMasterKey(exampleIdentity, currentPassword, 
+                                                                       exportedPasswordParams);
 
             // To verify that the exported identity, if imported, would produce
             // the same publickey and signature
@@ -129,10 +134,9 @@ public class TestSQRLClient {
         byte[] exportedMasterIdentityKey = Base64Url.decode("qW1q423n-Wbav3Q4VdSvUKsym98UJSxwKlLJ3zjhcHw");
         byte[] exportedPasswordSalt = Base64Url.decode("-yso1NLIr8Y");
         byte[] exportedPasswordVerify = Base64Url.decode("LksdXMl2BQ1LjjCGVvv-XuzRW-81EcdFPiCs5jmaYnU");
-        SQRLPasswordParameters exportedPasswordParams = new SQRLPasswordParameters(exportedPasswordSalt, 18, 8, 90);
-
-        SQRLIdentity exampleExportedIdentity = new SQRLIdentity("example identity", exportedMasterIdentityKey,
-                exportedPasswordVerify, exportedPasswordParams);
+        SQRLIdentity exampleExportedIdentity = new SQRLIdentity("example identity", exportedMasterIdentityKey, 
+                                                                exportedPasswordVerify, exportedPasswordSalt, 
+                                                                exportedPasswordParams);
 
         try {
             byte[] packagedIdentity = exampleExportedIdentity.createExportPackage();

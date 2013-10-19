@@ -1,6 +1,8 @@
 package com.sqrl.metrics;
 
 import com.lambdaworks.crypto.SCrypt;
+import com.sqrl.SQRLPasswordParameters;
+
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 
 import java.security.GeneralSecurityException;
@@ -43,15 +45,15 @@ public class SCryptMetrics {
         SCrypt.scrypt(m.password,m.salt,1<<17,2,645,32);
         System.out.println(System.currentTimeMillis() - time);
         m.benchmarkSCrypt(32*1024*1024);
-//        int[] params = m.paramsForLowP(60,32*1024*1024);
-        int[] params = m.paramsForTimeGivenMemory(60,32*1024*1024);
-        System.out.println("try " + params[0] + " " + params[1] + " " + params[2]);
+//        SQRLPasswordParameters suggestedParams = m.paramsForLowP(60,32*1024*1024);
+        SQRLPasswordParameters suggestedParams = m.paramsForTimeGivenMemory(60,32*1024*1024);
+        System.out.println("try " + suggestedParams);
     }
 
     /**
      * system heuristic prioritizing low parallelization, less accurate
      */
-    public int[] paramsForLowP(double timeSpec, int memorySpec) {
+    public SQRLPasswordParameters paramsForLowP(double timeSpec, int memorySpec) {
         if(candidates.isEmpty()) throw new IllegalStateException("no benchmark data present");
 
         timeSpec *= 1000000000; // 1 second
@@ -101,13 +103,13 @@ public class SCryptMetrics {
             outP = (int)Math.ceil(timeSpec / outTime);
         }
 
-        return new int[]{outNx,outR,outP};
+        return new SQRLPasswordParameters(outNx,outR,outP);
     }
 
     /**
      * system heuristic. at low timespec fuzz factor could be eliminated
      */
-    public int[] paramsForTimeGivenMemory(double timeSpec, int memorySpec) throws GeneralSecurityException {
+    public SQRLPasswordParameters paramsForTimeGivenMemory(double timeSpec, int memorySpec) throws GeneralSecurityException {
         if(candidates.isEmpty()) throw new IllegalStateException("no benchmark data present");
 
         timeSpec *= 1000000000; // 1 second
@@ -157,7 +159,7 @@ public class SCryptMetrics {
 
         outP = (int)Math.ceil(timeSpec / outTime);
 
-        return new int[]{outNx,outR,outP};
+        return new SQRLPasswordParameters(outNx,outR,outP);
     }
 
     private long getMemory(int Nx, int r, int p) {

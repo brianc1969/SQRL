@@ -32,13 +32,21 @@ public class SQRLIdentity {
      * the password was entered correctly.
      */
     private byte[] passwordVerify;
+    
+    /**
+     * Password Salt (64-bits)
+     * 
+     * This is a randomly generated salt value generated when the password is
+     * first set. Whenever the password changes, this also should change.
+     */
+    private byte[] passwordSalt;
 
     /**
      * Encapsulates all of the password information
      */
     private SQRLPasswordParameters passwordParameters;
 
-    public SQRLIdentity(String identityName, byte[] masterIdentityKey, byte[] passwordVerify, 
+    public SQRLIdentity(String identityName, byte[] masterIdentityKey, byte[] passwordVerify, byte[] passwordSalt,
                         SQRLPasswordParameters passwordParameters) {
         this.identityName = identityName;
         this.masterIdentityKey = masterIdentityKey;
@@ -58,6 +66,10 @@ public class SQRLIdentity {
         return passwordVerify;
     }
 
+    public byte[] getPasswordSalt() {
+        return passwordSalt;
+    }
+    
     public SQRLPasswordParameters getPasswordParameters() {
         return passwordParameters;
     }
@@ -85,7 +97,7 @@ public class SQRLIdentity {
         bytesOut.write(1); // signature algorithm version
         bytesOut.write(getMasterIdentityKey()); // encrypted master key
         bytesOut.write(1); // password algorithm version
-        bytesOut.write(getPasswordParameters().getPasswordSalt()); // per-password nonce
+        bytesOut.write(getPasswordSalt()); // per-password nonce
         bytesOut.write(getPasswordVerify());
         bytesOut.write(getPasswordParameters().getHashN());
         bytesOut.write(getPasswordParameters().getHashR());
