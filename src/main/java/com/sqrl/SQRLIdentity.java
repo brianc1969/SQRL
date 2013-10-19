@@ -16,7 +16,7 @@ public class SQRLIdentity {
 
     /**
      * Private Master Identity Key (256-bits)
-     * 
+     *
      * This key is XORed with the result of the password strengthening to create
      * the original master key
      */
@@ -35,7 +35,8 @@ public class SQRLIdentity {
      */
     private SQRLPasswordParameters passwordParameters;
 
-    public SQRLIdentity(String identityName, byte[] masterIdentityKey, byte[] passwordVerify, SQRLPasswordParameters passwordParameters) {
+    public SQRLIdentity(String identityName, byte[] masterIdentityKey, byte[] passwordVerify, 
+                        SQRLPasswordParameters passwordParameters) {
         this.identityName = identityName;
         this.masterIdentityKey = masterIdentityKey;
         this.passwordVerify = passwordVerify;

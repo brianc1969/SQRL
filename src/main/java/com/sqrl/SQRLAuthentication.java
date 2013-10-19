@@ -25,18 +25,18 @@ public class SQRLAuthentication {
         return identityAuthentication.getSiteURL();
     }
 
-    public byte[] getIdentityAuthentication() {
+    public byte[] getSignature() {
         return identityAuthentication.getSignature();
     }
 
-    public byte[] getIdentityPublicKey() {
+    public byte[] getPublicKey() {
         return sqrlAnonymousId.getKey();
     }
 
     @Override
     public String toString() {
-        return "SQRLAuthentication [siteURL=" + getSiteURL() + ", identityAuthentication="
-                + Base64Url.encode(getIdentityAuthentication()) + ", identityPublicKey="
-                + Base64Url.encode(getIdentityPublicKey()) + "]";
+        return "SQRLAuthentication [siteURL=" + getSiteURL() + ", signature="
+                + Base64Url.encode(getSignature()) + ", publicKey="
+                + Base64Url.encode(getPublicKey()) + "]";
     }
 }
