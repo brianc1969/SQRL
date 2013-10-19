@@ -123,4 +123,25 @@ public class TestSQRLClient {
             fail("Error exporting master identity key: " + e.getMessage());
         }
     }
+
+    @Test
+    public void testMasterKeyPackage() {
+        byte[] exportedMasterIdentityKey = Base64Url.decode("qW1q423n-Wbav3Q4VdSvUKsym98UJSxwKlLJ3zjhcHw");
+        byte[] exportedPasswordSalt = Base64Url.decode("-yso1NLIr8Y");
+        byte[] exportedPasswordVerify = Base64Url.decode("LksdXMl2BQ1LjjCGVvv-XuzRW-81EcdFPiCs5jmaYnU");
+        SQRLPasswordParameters exportedPasswordParams = new SQRLPasswordParameters(exportedPasswordSalt, 18, 8, 90);
+
+        SQRLIdentity exampleExportedIdentity = new SQRLIdentity("example identity", exportedMasterIdentityKey,
+                exportedPasswordVerify, exportedPasswordParams);
+
+        try {
+            byte[] packagedIdentity = exampleExportedIdentity.createExportPackage();
+            String expectedPackage = "AaltauNt5_lm2r90OFXUr1CrMpvfFCUscCpSyd844XB8AfsrKNTSyK_"
+                    + "GLksdXMl2BQ1LjjCGVvv-XuzRW-81EcdFPiCs5jmaYnUSCABa";
+            assertEquals(expectedPackage, Base64Url.encode(packagedIdentity));
+        } catch (IOException e) {
+            fail("Could not create packaged identity: " + e.getMessage());
+        }
+    }
+
 }
