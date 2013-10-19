@@ -31,7 +31,6 @@ public class Curve25519 {
 			return md.digest(m);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-			System.exit(1);
 		}
 		return null;
 	}

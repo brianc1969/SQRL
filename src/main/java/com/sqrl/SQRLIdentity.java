@@ -51,6 +51,7 @@ public class SQRLIdentity {
         this.identityName = identityName;
         this.masterIdentityKey = masterIdentityKey;
         this.passwordVerify = passwordVerify;
+        this.passwordSalt = passwordSalt;
         this.passwordParameters = passwordParameters;
     }
 
@@ -110,6 +111,7 @@ public class SQRLIdentity {
     public String toString() {
         return "SQRLIdentity [identityName=" + identityName + ", masterIdentityKey="
                 + Base64Url.encode(masterIdentityKey) + ", passwordVerify=" + Base64Url.encode(passwordVerify)
+                + ", passwordSalt=" + Base64Url.encode(passwordSalt)
                 + ", passwordParameters=" + passwordParameters + "]";
     }
 }

@@ -26,7 +26,6 @@ public class URLs {
         endOfTld += d;
 
         tld = tld.substring(0, endOfTld);
-        System.out.println("TLD : " + tld + "\n");
         return tld;
     }
 }

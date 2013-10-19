@@ -141,7 +141,7 @@ public class SQRLClient {
         byte[] newPasswordSalt = secureRandom(8); // 64-bit salt
 
         // STEP 5: SCrypt the newPassword and newPasswordSalt
-        byte[] newScryptResult = SCrypt.scrypt(newPassword, identity.getPasswordSalt(), newParameters);
+        byte[] newScryptResult = SCrypt.scrypt(newPassword, newPasswordSalt, newParameters);
         
         // STEP 6: SHA256 the SCrypt result from STEP 5 to create the new password verifier
         byte[] newPasswordVerify = SHA256.digest(newScryptResult);

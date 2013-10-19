@@ -72,8 +72,8 @@ public class SCryptMetrics {
 
         double predictedCost = bestCost;
         if(outNx <= 0) {
-            // TODO Log.warn
-            System.out.println("no good candidates!");
+            // TODO: throw exception
+//            System.out.println("no good candidates!");
             outNx = (int)Math.ceil(targetNx);
         } else {
             int predictNx = outNx;
@@ -94,8 +94,8 @@ public class SCryptMetrics {
             outNx++;
             outR = memorySpec / ((1 << outNx) * 128);
             if(candidatesN[outNx] == null) {
-                // TODO Log warn
-                System.out.println("no sample for Nx " + outNx);
+                // TODO throw exception
+//                System.out.println("no sample for Nx " + outNx);
             } else {
                 predictedCost = candidatesN[outNx].cost;
             }
@@ -130,8 +130,8 @@ public class SCryptMetrics {
         }
         double predictedCost = bestCost;
         if(outNx <= 0) {
-            // TODO Log.warn
-            System.out.println("no good candidates!");
+            // TODO throw exception
+//            System.out.println("no good candidates!");
             outNx = (int)Math.ceil(targetNx);
         } else {
             predictedCost = candidatesN[outNx].cost;
@@ -239,8 +239,8 @@ public class SCryptMetrics {
 
         Collections.sort(candidates, new CostComparator());
         if(candidates.get(candidates.size()-1).cost < costStatistics.getMean()) {
-            // TODO Log.warn
-            System.out.println("not enough memory for confident benchmark");
+            // TODO throw exception
+//            System.out.println("not enough memory for confident benchmark");
         }
         cullSCryptCandidatesForCost(candidates,costStatistics,16);
 
