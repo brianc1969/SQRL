@@ -8,6 +8,12 @@ public class Bytes {
         }
         return output;
     }
+    
+    public static void zero(byte[] a) {
+        for ( int i = a.length - 1; i >= 0; --i) {
+            a[i] = 0;
+        }
+    }
 
     public static boolean arrayEqual(byte[] a, byte[] b) {
         if (a.length != b.length)

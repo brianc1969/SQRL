@@ -72,12 +72,20 @@ public class SQRLClient {
         // STEP 7: XOR the original master key with the SCrypt result from STEP 5 to create the new master identity key
         byte[] newMasterIdentityKey = Bytes.xor(originalMasterKey, newScryptResult);
         
+        // STEP 8: We are going to be paranoid and zero-out the original master key and scrypt result so that they
+        // don't hang around in memory waiting to be garbage collected.
+        Bytes.zero(originalMasterKey);
+        Bytes.zero(scryptResult);
+        Bytes.zero(newScryptResult);
+        
         // Return a new SQRLIdentity with the new password salt, password verify, password parameters 
         //  and master identity key
-        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, newPasswordVerify, newPasswordParameters);
+        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
+                                newPasswordVerify, newPasswordParameters);
     }
     
-    public static SQRLIdentity changePassword(SQRLIdentity identity, String currentPassword, String newPassword) throws SQRLException {
+    public static SQRLIdentity changePassword(SQRLIdentity identity, String currentPassword, String newPassword)
+                                                                                                throws SQRLException {
         // STEP 1: Scrypt the current password + passwordSalt
         // This is the expensive operation and its parameters should be tuned so
         // that this operation takes between 1-2 seconds to perform.
@@ -108,13 +116,21 @@ public class SQRLClient {
         // STEP 7: XOR the original master key with the SCrypt result from STEP 5 to create the new master identity key
         byte[] newMasterIdentityKey = Bytes.xor(originalMasterKey, newScryptResult);
         
+        // STEP 8: We are going to be paranoid and zero-out the original master key and scrypt result so that they
+        // don't hang around in memory waiting to be garbage collected.
+        Bytes.zero(originalMasterKey);
+        Bytes.zero(scryptResult);
+        Bytes.zero(newScryptResult);
+        
         // Return a new SQRLIdentity with the new password salt, password verify, and master identity key
         // Note: the password is not permanently changed until this new identity object is written over the
         //       old identity on disk.
-        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, newPasswordVerify, newPasswordParameters);
+        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
+                                newPasswordVerify, newPasswordParameters);
     }
 
-    public static SQRLAuthentication createAuthentication(SQRLIdentity identity, String password, String siteURL) throws SQRLException {
+    public static SQRLAuthentication createAuthentication(SQRLIdentity identity, String password, String siteURL) 
+                                                                                                throws SQRLException {
         // STEP 1: Scrypt the password + passwordSalt
         // This is the expensive operation and its parameters should be tuned so
         // that this operation takes between 1-2 seconds to perform.
@@ -141,6 +157,12 @@ public class SQRLClient {
 
         // STEP 6: Sign the entire site URL with the private key from STEP 4.
         byte[] signature = Curve25519.signature(siteURL.getBytes(Charset.forName("UTF-8")), privateKey, publicKey);
+        
+        // STEP 7: We are going to be paranoid and zero-out the original master key, private key, and scrypt result
+        // so that they don't hang around in memory waiting to be garbage collected.
+        Bytes.zero(originalMasterKey);
+        Bytes.zero(privateKey);
+        Bytes.zero(scryptResult);
 
         // Return authentication object containing all the
         // outputs which are to be sent to the server.
