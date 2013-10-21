@@ -34,3 +34,4 @@ This project utilizes the following libraries under the following licenses:
 + github.com/wg/scrypt (Apache 2.0)
 + Apache HttpClient (Apache 2.0)
 + JUnit (BSD)
++ Curve25519 Implementation by k3d3 (Public Domain)
