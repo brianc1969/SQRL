@@ -2,7 +2,7 @@ SQRL
 ====
 
 Java SQRL (Secure QR Login) implementation. 
-See https://www.grc.com/sqrl/sqrl.htm for more information on the SQRL protocol itself.
+See https://www.grc.com/sqrl/sqrl.htm for more information on the SQRL protocol itself. This repository is a community contribution and does not represent Steve Gibson or grc.com.
 
 DISCLAIMER
 ==========
