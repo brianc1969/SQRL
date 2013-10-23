@@ -42,6 +42,36 @@ public class SQRLClient {
     }
 
     /**
+     * Creates a brand-new SQRIdentity using the given password and difficultyParameters.
+     * 
+     * @param password
+     * @param difficultyParameters
+     * @return new SQRLIdentity
+     * @throws SQRLException
+     */
+    public static SQRLIdentity createIdentity(String identityName, String password, 
+                                              SQRLPasswordParameters difficultyParameters) {
+        // STEP 1: Create identity master key
+        byte[] identityMaster = secureRandom(32); // 256-bits
+        
+        // STEP 2: Create password Salt
+        byte[] passwordSalt = secureRandom(8); // 64-bits
+        
+        // STEP 3: SCrypt so that we can calculate password verifier
+        byte[] scryptResult = SCrypt.scrypt(password, passwordSalt, difficultyParameters);
+        
+        // STEP 4: Calculate password verifier
+        byte[] passwordVerify = SHA256.digest(scryptResult);
+        
+        // STEP 5: Be paranoid and blank out the scryptResult because we don't need it anymore and  
+        // we don't want it to hang around in memory
+        Bytes.zero(scryptResult);
+        
+        // STEP 6: Finally, assemble the SQRLIdentity
+        return new SQRLIdentity(identityName, identityMaster, passwordVerify, passwordSalt, difficultyParameters);
+    }
+    
+    /**
      * Creates an exported key identity with the specified difficulty parameters. 
      * @param identity
      * @param password

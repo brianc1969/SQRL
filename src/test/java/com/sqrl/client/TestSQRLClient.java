@@ -35,6 +35,41 @@ public class TestSQRLClient {
                                                     passwordSalt, examplePasswordParameters);
 
     @Test
+    public void testCreateIdentity() {
+        // STEP 0: Have the user enter the password for the identity.
+        // example user-entered password
+        String password = "password";
+
+        // STEP 1: Create the new identity.
+        SQRLIdentity created = SQRLClient.createIdentity("test", password, examplePasswordParameters);
+        
+        // test master identity key was created and is 256-bit
+        assert(created.getMasterIdentityKey() != null);
+        assertEquals(32, created.getMasterIdentityKey().length);
+        // test password salt was created and is 64-bits
+        assert(created.getPasswordSalt() != null);
+        assertEquals(8, created.getPasswordSalt().length);
+        // test password verify was created and is 256-bits
+        assert(created.getPasswordVerify() != null);
+        assertEquals(32, created.getPasswordVerify().length);
+
+        SQRLPasswordParameters createdIdentityParams = created.getPasswordParameters();
+        // test password parameters matched what we passed into the createIdentity() method
+        assertEquals(examplePasswordParameters.getHashN(), createdIdentityParams.getHashN());
+        assertEquals(examplePasswordParameters.getHashR(), createdIdentityParams.getHashR());
+        assertEquals(examplePasswordParameters.getHashP(), createdIdentityParams.getHashP());
+        
+        // Finally, create a sample authentication, it will throw a passwordVerification exception if the
+        // the password verification failed to initialize correctly.
+        String siteURL = "www.example.com/~bob/sqrl.php?d=5&nut=KJA7nLFDQWWmvt10yVjNDoQ81uTvNorPrr53PPRJesz";
+        try {
+            SQRLClient.createAuthentication(exampleIdentity, password, siteURL);
+        } catch (SQRLException e) {
+            fail("Error creating authentication for " + URLs.getTLD(siteURL) + ":" + e.getMessage());
+        }
+    }
+    
+    @Test
     public void testLogin() {
         // STEP 0: Have the user enter the password for the identity.
         // example user-entered password
