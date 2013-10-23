@@ -175,8 +175,8 @@ public class TestSQRLClient {
 
         try {
             byte[] packagedIdentity = exampleExportedIdentity.createExportPackage();
-            String expectedPackage = "AaltauNt5_lm2r90OFXUr1CrMpvfFCUscCpSyd844XB8AfsrKNTSyK_"
-                    + "GLksdXMl2BQ1LjjCGVvv-XuzRW-81EcdFPiCs5jmaYnUSCABa";
+            String expectedPackage = "AaltauNt5_lm2r90OFXUr1CrMpvfFCUscCpS"
+                                   + "yd844XB8AfsrKNTSyK_GLksdXMl2BQ0SCABa";
             assertEquals(expectedPackage, Base64Url.encode(packagedIdentity));
         } catch (IOException e) {
             fail("Could not create packaged identity: " + e.getMessage());

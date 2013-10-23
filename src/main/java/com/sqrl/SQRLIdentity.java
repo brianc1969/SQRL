@@ -2,6 +2,7 @@ package com.sqrl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import com.sqrl.utils.Base64Url;
 
@@ -26,9 +27,9 @@ public class SQRLIdentity {
     private byte[] masterIdentityKey;
 
     /**
-     * Password Verify Value (128-bits)
+     * Password Verify Value (256-bits)
      *
-     * This is the first 128-bits of SHA256(scrypt_result) and is used to verify
+     * This is the first 256-bits of SHA256(scrypt_result) and is used to verify
      * the password was entered correctly.
      */
     private byte[] passwordVerify;
@@ -99,7 +100,7 @@ public class SQRLIdentity {
         bytesOut.write(getMasterIdentityKey()); // encrypted master key
         bytesOut.write(1); // password algorithm version
         bytesOut.write(getPasswordSalt()); // per-password nonce
-        bytesOut.write(getPasswordVerify());
+        bytesOut.write(Arrays.copyOfRange(getPasswordVerify(), 0, 8)); // first 64-bits of password verify
         bytesOut.write(getPasswordParameters().getHashN());
         bytesOut.write(getPasswordParameters().getHashR());
         bytesOut.write((getPasswordParameters().getHashP() >>> 8) & 0xFF);
