@@ -2,7 +2,7 @@ SQRL
 ====
 
 Java SQRL (Secure QR Login) implementation. 
-See https://www.grc.com/sqrl/sqrl.htm for more information on the SQRL protocol itself.
+See https://www.grc.com/sqrl/sqrl.htm for more information on the SQRL protocol itself. This repository is a community contribution and does not represent Steve Gibson or grc.com.
 
 DISCLAIMER
 ==========
@@ -34,3 +34,4 @@ This project utilizes the following libraries under the following licenses:
 + github.com/wg/scrypt (Apache 2.0)
 + Apache HttpClient (Apache 2.0)
 + JUnit (BSD)
++ Curve25519 Implementation by k3d3 (Public Domain)
