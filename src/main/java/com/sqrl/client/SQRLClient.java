@@ -1,6 +1,7 @@
 package com.sqrl.client;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -44,13 +45,31 @@ public class SQRLClient {
     /**
      * Creates a brand-new SQRIdentity using the given password and difficultyParameters.
      * 
+     * @param identityName
+     * @param identityUnlockKey - 32-byte ByteBuffer that the identityUnlockKey will be written to (optional)
      * @param password
      * @param difficultyParameters
      * @return new SQRLIdentity
      * @throws SQRLException
      */
-    public static SQRLIdentity createIdentity(String identityName, String password, 
+    public static SQRLIdentity createIdentity(String identityName, ByteBuffer identityUnlockKey, String password, 
                                               SQRLPasswordParameters difficultyParameters) {
+        
+        // If the user wanted to generate an identityUnlockKey, generate one and pass it back to the caller by 
+        // writing the private-key (IdentityUnlockKey) to the ByteBuffer.
+        byte[] identityLockKey = null;
+        if ( identityUnlockKey != null ) {
+            // Create New private-key (IdentityUnlockKey)
+            byte[] identityUnlock = secureRandom(32); // 256-bits
+            
+            // Synthesize public-key (IdentityLockKey)
+            identityLockKey = Curve25519.publickey(identityUnlock);
+            
+            // write private-key (IdentityUnlockKey) to the ByteBuffer so it can be exported stored offline
+            // and NOT stored on-disk
+            identityUnlockKey.put(identityUnlock);
+        }
+        
         // STEP 1: Create identity master key
         byte[] identityMaster = secureRandom(32); // 256-bits
         
@@ -68,7 +87,8 @@ public class SQRLClient {
         Bytes.zero(scryptResult);
         
         // STEP 6: Finally, assemble the SQRLIdentity
-        return new SQRLIdentity(identityName, identityMaster, passwordVerify, passwordSalt, difficultyParameters);
+        return new SQRLIdentity(identityName, identityLockKey, identityMaster, 
+                                passwordVerify, passwordSalt, difficultyParameters);
     }
     
     /**
@@ -118,7 +138,7 @@ public class SQRLClient {
         
         // Return a new SQRLIdentity with the new password salt, password verify, password parameters 
         //  and master identity key
-        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
+        return new SQRLIdentity(identity.getIdentityName(), identity.getIdentityLockKey(), newMasterIdentityKey, 
                                 newPasswordVerify, newPasswordSalt, exportedDifficultyParameters);
     }
     
@@ -188,7 +208,7 @@ public class SQRLClient {
         // Return a new SQRLIdentity with the new password salt, password verify, and master identity key
         // Note: the password is not permanently changed until this new identity object is written over the
         //       old identity on disk.
-        return new SQRLIdentity(identity.getIdentityName(), newMasterIdentityKey, 
+        return new SQRLIdentity(identity.getIdentityName(), identity.getIdentityLockKey(), newMasterIdentityKey, 
                                 newPasswordVerify, newPasswordSalt, newParameters);
     }
 

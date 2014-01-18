@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
 import com.sqrl.SQRLAuthentication;
 import com.sqrl.SQRLIdentity;
 import com.sqrl.SQRLPasswordParameters;
+import com.sqrl.crypto.Curve25519;
 import com.sqrl.exception.SQRLException;
 import com.sqrl.utils.Base64Url;
 import com.sqrl.utils.URLs;
@@ -41,7 +43,8 @@ public class TestSQRLClient {
         String password = "password";
 
         // STEP 1: Create the new identity.
-        SQRLIdentity created = SQRLClient.createIdentity("test", password, examplePasswordParameters);
+        ByteBuffer identityUnlockKey = ByteBuffer.wrap(new byte[32]);
+        SQRLIdentity created = SQRLClient.createIdentity("test", identityUnlockKey, password, examplePasswordParameters);
         
         // test master identity key was created and is 256-bit
         assert(created.getMasterIdentityKey() != null);
@@ -58,6 +61,11 @@ public class TestSQRLClient {
         assertEquals(examplePasswordParameters.getHashN(), createdIdentityParams.getHashN());
         assertEquals(examplePasswordParameters.getHashR(), createdIdentityParams.getHashR());
         assertEquals(examplePasswordParameters.getHashP(), createdIdentityParams.getHashP());
+        
+        // test that the private-key (identityUnlockKey) does indeed generate the public-key (identityLockKey)
+        String identityPubKey = Base64Url.encode(created.getIdentityLockKey());
+        String calculatedPubKey = Base64Url.encode(Curve25519.publickey(identityUnlockKey.array()));
+        assertEquals(identityPubKey, calculatedPubKey);
         
         // Finally, create a sample authentication, it will throw a passwordVerification exception if the
         // the password verification failed to initialize correctly.

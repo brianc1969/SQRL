@@ -10,7 +10,7 @@ import com.sqrl.utils.Base64Url;
  * Represents a SQRL identity.
  * 
  * This class is immutable, actions like password updates will cause the master
- * identity key and password salt to also change, so a new SQRL Idenity should
+ * identity key and password salt to also change, so a new SQRLIdenity should
  * be created.
  */
 public class SQRLIdentity {
@@ -47,6 +47,13 @@ public class SQRLIdentity {
      */
     private SQRLPasswordParameters passwordParameters;
 
+    /**
+     * Identity Lock Key (256-bits)
+     * 
+     * Allows identity recovery by using the offline IdentityUnlockKey
+     */
+    private byte[] identityLockKey = null;
+
     public SQRLIdentity(String identityName, byte[] masterIdentityKey, byte[] passwordVerify, byte[] passwordSalt,
                         SQRLPasswordParameters passwordParameters) {
         this.identityName = identityName;
@@ -56,8 +63,22 @@ public class SQRLIdentity {
         this.passwordParameters = passwordParameters;
     }
 
+    public SQRLIdentity(String identityName, byte[] identityLockKey, byte[] masterIdentityKey, byte[] passwordVerify,
+                        byte[] passwordSalt, SQRLPasswordParameters passwordParameters) {
+        this.identityName = identityName;
+        this.identityLockKey = identityLockKey;
+        this.masterIdentityKey = masterIdentityKey;
+        this.passwordVerify = passwordVerify;
+        this.passwordSalt = passwordSalt;
+        this.passwordParameters = passwordParameters;
+    }
+
     public String getIdentityName() {
         return identityName;
+    }
+    
+    public byte[] getIdentityLockKey() {
+        return identityLockKey;
     }
 
     public byte[] getMasterIdentityKey() {
